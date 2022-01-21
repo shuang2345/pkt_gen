@@ -21,48 +21,6 @@ def parse_args():
     parser.add_argument('--count','-c', type=int, help='packet count')
     return parser.parse_args()
 
-def pkt_send():
-    pkt = IP(src="10.0.0.2", dst="10.0.0.1")/TCP(dport=8080)
-    res = sr1(pkt)
-
-    print(res.getlayer("TCP").flags)
-
-    if res.haslayer("TCP") and res.getlayer("TCP").flags == 0x12:
-        pkt = IP(src="10.0.0.2", dst="10.0.0.1")/TCP(dport=8080, flags='A')
-        pkt.getlayer("TCP").seq = res.getlayer("TCP").ack
-        pkt.getlayer("TCP").ack = res.getlayer("TCP").seq + 1 
-        send(pkt)
-
-        #pkt = IP(src="10.0.0.2", dst="10.0.0.1")/TCP(dport=8080, flags='PA') / HTTPRequest()
-        pkt = pkt / ('Hello You!\n')
-        #pkt = pkt / HTTPRequest()
-        res = send(pkt)
-
-        pkt = IP(src="10.0.0.2", dst="10.0.0.1")/TCP(dport=8080, flags='FA')
-        res = send(pkt)
-        #res.show()
-
-def _pkt_construct(sip: str, dip:str, port:int, proto:str, count:int, conn:bool):
-
-   sport = random.randint(10, 65535)
-   pkt = IP(src=sip, dst=dip)/TCP(sport=sport, dport=port)
-   res = sr1(pkt)
-
-   print(res.getlayer("TCP").flags)
-
-   if res.haslayer("TCP") and res.getlayer("TCP").flags == 0x12:
-       pkt = IP(src=sip, dst=dip)/TCP(sport=sport,dport=port, flags='A')
-       pkt.getlayer("TCP").seq = res.getlayer("TCP").ack
-       pkt.getlayer("TCP").ack = res.getlayer("TCP").seq + 1
-       send(pkt)
-
-       #pkt = pkt / HTTPRequest()
-       pkt = pkt / ('Hello You!\n')
-       res = send(pkt)
-
-       pkt = IP(src=sip, dst=dip)/TCP(sport=sport, dport=port, flags='FA')
-       res = send(pkt)
-       #res.show() 
 def conn_send(sip: str, dip:str, sport:int, port:int):
     #Send SYN packet
     pkt = IP(src=sip, dst=dip)/TCP(sport=sport, dport=port)
